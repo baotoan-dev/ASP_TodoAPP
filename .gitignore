@@ -1,0 +1,39 @@
+# .NET Core
+bin/
+obj/
+
+# Các thư mục build, output, cache và tạm thời
+.vs/
+.idea/
+.vscode/
+
+# Các tệp cấu hình Visual Studio
+.vs2019/
+.vs2017/
+.vs2015/
+.vsconfig
+
+# Thư mục chứa dữ liệu cục bộ của NuGet
+.nuget/
+
+# File xác thực của người dùng Azure
+*.azurePubXml
+
+# Log files
+*.log
+
+# Các file nhạy cảm
+appsettings.json
+appsettings.Development.json
+secrets.json
+local.settings.json
+
+# Bỏ qua các file môi trường
+.env
+
+# Các file tạm thời khác của hệ thống (macOS, Windows, etc)
+.DS_Store
+Thumbs.db
+
+# Các thư mục chứa các tệp build output của container Docker
+docker-compose.override.yml

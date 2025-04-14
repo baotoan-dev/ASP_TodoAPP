@@ -1,0 +1,52 @@
+@model TodoApp.DTOs.LoginDTO
+
+<!-- Container cho form -->
+<div class="container-fluid d-flex justify-content-center align-items-center min-vh-100 p-0">
+    <div class="bg-white p-5 rounded shadow border" style="max-width: 450px; width: 100%; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);">
+        <!-- Tiêu đề của form -->
+        <h2 class="text-center text-primary mb-4">Welcome Back!</h2>
+        <p class="text-center mb-4">Please enter your credentials to log in.</p>
+
+        <form asp-action="Login" method="post">
+            @Html.AntiForgeryToken()
+
+            <!-- Hiển thị lỗi validation nếu có -->
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger">
+                    <ul class="mb-0">
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <li>@error.ErrorMessage</li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            <div class="mb-3">
+                <label asp-for="UserName" class="form-label">Username</label>
+                <input asp-for="UserName" class="form-control" placeholder="Enter your username" />
+                <span asp-validation-for="UserName" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label">Password</label>
+                <input asp-for="Password" type="password" class="form-control" placeholder="Enter your password" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <!-- Button submit -->
+            <div class="d-grid mb-3">
+                <button type="submit" class="btn btn-primary btn-lg">Login</button>
+            </div>
+
+            <!-- Link to register page -->
+            <div class="text-center">
+                <p class="mb-0">
+                    Don't have an account?
+                    <a asp-controller="Account" asp-action="Register" class="text-decoration-none text-primary">Register here</a>
+                </p>
+            </div>
+        </form>
+    </div>
+</div>

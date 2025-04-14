@@ -1,0 +1,82 @@
+@model TodoApp.DTOs.RegisterDTO
+
+<!-- Container cho form -->
+<div class="container d-flex justify-content-center align-items-center min-vh-100 p-0 overflow-hidden">
+    <div class="bg-white p-4 rounded shadow border" style="max-width: 500px; width: 100%; box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.1);">
+        <!-- Tiêu đề của form -->
+        <h1 class="text-center mb-4">Register</h1>
+
+        <form asp-action="Register" method="post">
+            @Html.AntiForgeryToken()
+
+            <!-- Hiển thị lỗi validation nếu có -->
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger">
+                    <ul class="mb-0">
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <li>@error.ErrorMessage</li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            <!-- Username -->
+            <div class="mb-3">
+                <label asp-for="UserName" class="form-label">Username</label>
+                <input asp-for="UserName" class="form-control" placeholder="Enter your username" />
+                <span asp-validation-for="UserName" class="text-danger"></span>
+            </div>
+
+            <!-- Email -->
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label">Email</label>
+                <input asp-for="Email" type="email" class="form-control" placeholder="Enter your email" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <!-- Password -->
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label">Password</label>
+                <input asp-for="Password" type="password" class="form-control" placeholder="Create a password" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <!-- Confirm Password -->
+            <div class="mb-3">
+                <label asp-for="ConfirmPassword" class="form-label">Confirm Password</label>
+                <input asp-for="ConfirmPassword" type="password" class="form-control" placeholder="Confirm your password" />
+                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+            </div>
+
+            <!-- Full Name -->
+            <div class="mb-3">
+                <label asp-for="FullName" class="form-label">Full Name</label>
+                <input asp-for="FullName" class="form-control" placeholder="Enter your full name" />
+                <span asp-validation-for="FullName" class="text-danger"></span>
+            </div>
+
+            <!-- Hiển thị thông báo thành công -->
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success">
+                    @TempData["SuccessMessage"]
+                </div>
+            }
+
+            <!-- Button submit -->
+            <div class="d-grid mb-3">
+                <button type="submit" class="btn btn-primary btn-lg">Register</button>
+            </div>
+
+            <!-- Link to login page -->
+            <div class="text-center">
+                <p class="mb-0">
+                    Already have an account?
+                    <a asp-controller="Account" asp-action="Login">Login here</a>
+                </p>
+            </div>
+        </form>
+    </div>
+</div>

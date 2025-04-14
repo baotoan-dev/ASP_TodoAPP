@@ -1,0 +1,40 @@
+name: CI/CD Pipeline for TodoApp
+
+on:
+  push:
+    branches:
+      - main # Đảm bảo rằng workflow chỉ chạy khi có thay đổi trên nhánh main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout mã nguồn từ repository
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # Step 2: Cài đặt .NET SDK
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: "8.0"
+
+      # Step 3: Restore dependencies (NuGet)
+      - name: Restore dependencies
+        run: dotnet restore
+
+      # Step 4: Build ứng dụng .NET
+      - name: Build application
+        run: dotnet build --configuration Release
+
+      # Step 5: Publish ứng dụng .NET
+      - name: Publish application
+        run: dotnet publish --configuration Release --output ./out
+
+      # Step 6: Build Docker image
+      - name: Build Docker image
+        run: docker build -t todoapp .
