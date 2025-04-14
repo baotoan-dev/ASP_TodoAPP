@@ -15,11 +15,11 @@ jobs:
     steps:
       # Step 1: Checkout mã nguồn từ repository
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3 # Cập nhật lên v3
 
       # Step 2: Cài đặt .NET SDK
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v2
+        uses: actions/setup-dotnet@v3 # Cập nhật lên v3
         with:
           dotnet-version: "8.0"
 
@@ -37,4 +37,10 @@ jobs:
 
       # Step 6: Build Docker image
       - name: Build Docker image
-        run: docker build -t todoapp .
+        run: docker build -t todoapp . # Docker build image
+
+
+      # Step 7: Push Docker image (optional)
+      # Nếu muốn đẩy lên Docker registry, bạn cần thêm bước push
+      # - name: Push Docker image
+      #   run: docker push your-docker-repo/todoapp
