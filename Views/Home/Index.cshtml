@@ -29,6 +29,9 @@
                     </td>
                     <td>@(container.CreatedAt.ToString("yyyy-MM-dd") ?? "")</td>
                     <td>
+                        <a class="btn btn-primary" asp-controller="Todo" asp-action="View" asp-route-id="@container.Id">
+                            View
+                        </a>
                         <button class="btn btn-info"
                                 data-bs-toggle="modal"
                                 data-bs-target="#todoContainerModal"

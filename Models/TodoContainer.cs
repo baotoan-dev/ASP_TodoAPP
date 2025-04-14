@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Identity;
 
 namespace TodoApp.Models
 {
@@ -23,6 +25,7 @@ namespace TodoApp.Models
         [ForeignKey("UserId")]
         public ApplicationUser? User { get; set; }
 
+    [JsonIgnore]
         public List<TodoItem> TodoItems { get; set; } = new();
     }
 }

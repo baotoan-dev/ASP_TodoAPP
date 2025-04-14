@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TodoApp.Data;
 using TodoApp.Models;
+using System.Text.Json;
 
 namespace TodoApp.Controllers
 {
@@ -19,27 +20,39 @@ namespace TodoApp.Controllers
             _userManager = userManager;
         }
 
-    public async Task<IActionResult> Index()
-    {
-        var userId = _userManager.GetUserId(User);
-        if (string.IsNullOrEmpty(userId))
+
+        public async Task<IActionResult> Index()
         {
-            return RedirectToAction("Login", "Account");
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var containers = await _context.TodoContainers
+                .Where(c => c.UserId == userId)
+                .Include(c => c.TodoItems) // Bao gồm TodoItems
+                .ToListAsync();
+
+            // Sử dụng JsonSerializerOptions với ReferenceHandler.Preserve để tránh chu kỳ
+            var jsonOptions = new JsonSerializerOptions
+            {
+                ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve,
+                MaxDepth = 64
+            };
+
+            // Serialize các container và TodoItems thành JSON để kiểm tra
+            var serializedContainers = JsonSerializer.Serialize(containers, jsonOptions);
+            Console.WriteLine(serializedContainers); // Kiểm tra xem đã serialize thành công chưa
+
+            // Trả về kết quả dưới dạng JSON hoặc trong View
+            return RedirectToAction("Index", "Home", new { containers = containers });
         }
 
-        var containers = await _context.TodoContainers
-            .Where(c => c.UserId == userId)
-            .Include(c => c.TodoItems) // Including TodoItems if needed for future reference
-            .ToListAsync();
-
-        // Debugging: Kiểm tra xem có dữ liệu không
-        Console.WriteLine($"Found {containers.Count} containers");
-
-        return RedirectToAction("Index", "Home", new { containers = containers });
-    }
 
 
-      public async Task<IActionResult> Save(TodoContainer container)
+
+        public async Task<IActionResult> Save(TodoContainer container)
         {
             Console.WriteLine("Save method called");
             Console.WriteLine($"Container: {System.Text.Json.JsonSerializer.Serialize(container)}");
@@ -87,6 +100,37 @@ namespace TodoApp.Controllers
                 // Log lỗi tại đây (ví dụ: lưu vào file log hoặc database)
                 return View("Error");
             }
+
+            return RedirectToAction("Index", "Home");
+        }
+
+    
+        // Delete method
+        [HttpPost]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var container = await _context.TodoContainers
+                                        .Include(c => c.TodoItems)  // Load TodoItems liên quan
+                                        .FirstOrDefaultAsync(c => c.Id == id);
+
+            if (container == null || container.UserId != userId)
+            {
+                return Unauthorized(); // Nếu không tìm thấy hoặc không phải user của container, trả về Unauthorized
+            }
+
+            // Xóa các TodoItems liên quan
+            _context.TodoItems.RemoveRange(container.TodoItems);
+
+            // Xóa TodoContainer
+            _context.TodoContainers.Remove(container);
+
+            await _context.SaveChangesAsync();
 
             return RedirectToAction("Index", "Home");
         }
