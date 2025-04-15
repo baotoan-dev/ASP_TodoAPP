@@ -1,0 +1,70 @@
+@model List<TodoApp.Models.TodoContainer>
+@{
+    var from = (DateTime)(ViewBag.From ?? DateTime.Today);
+    var to = (DateTime)(ViewBag.To ?? DateTime.Today.AddDays(6));
+}
+
+<h2 class="fw-bold mb-4">🗓️ Weekly Schedule</h2>
+
+<!-- Bộ lọc ngày -->
+<form method="get" class="row g-3 align-items-center mb-4">
+    <div class="col-auto">
+        <label class="col-form-label">📅 Từ:</label>
+    </div>
+    <div class="col-auto">
+        <input type="date" name="from" class="form-control" value="@from.ToString("yyyy-MM-dd")" />
+    </div>
+    <div class="col-auto">
+        <label class="col-form-label">➡️ Đến:</label>
+    </div>
+    <div class="col-auto">
+        <input type="date" name="to" class="form-control" value="@to.ToString("yyyy-MM-dd")" />
+    </div>
+    <div class="col-auto">
+        <button type="submit" class="btn btn-outline-primary">Lọc</button>
+    </div>
+    <div class="col-auto">
+        <a href="@Url.Action("Index", "Schedule")" class="btn btn-outline-secondary">Reset</a>
+    </div>
+</form>
+
+<!-- Bảng thời khóa biểu -->
+<div class="table-responsive">
+    <table class="table table-bordered text-center align-middle">
+        <thead class="table-light">
+            <tr>
+                @for (var d = from; d <= to; d = d.AddDays(1))
+                {
+                    <th>@d.ToString("ddd, dd/MM")</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                @for (var d = from; d <= to; d = d.AddDays(1))
+                {
+                    var date = d.Date;
+                    var dayContainers = Model.Where(c => c.DueDate?.Date == date).ToList();
+
+                    <td>
+                        @if (dayContainers.Any())
+                        {
+                            @foreach (var container in dayContainers)
+                            {
+                                <div class="mb-2 p-2 border rounded" style="border-left: 4px solid @container.ThemeColor;">
+                                    <strong>@container.Title</strong><br />
+                                    <small class="text-muted">Tasks: @container.TodoItems?.Count()</small><br />
+                                    <a asp-controller="Todo" asp-action="View" asp-route-id="@container.Id" class="btn btn-sm btn-outline-primary mt-1">Chi tiết</a>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <span class="text-muted">-</span>
+                        }
+                    </td>
+                }
+            </tr>
+        </tbody>
+    </table>
+</div>

@@ -52,4 +52,10 @@ public class HomeController : Controller
         return View(containers);
     }
 
+
+    public async Task<IActionResult> About()
+    {
+        return View();
+    }
+
 }

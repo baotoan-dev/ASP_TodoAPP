@@ -83,7 +83,6 @@ namespace TodoApp.Controllers
                     return RedirectToAction("Index", "Home");
                 }
 
-
                 _context.TodoContainers.Add(container);
             }
             else // Chỉnh sửa
@@ -113,7 +112,6 @@ namespace TodoApp.Controllers
 
             return RedirectToAction("Index", "Home");
         }
-
 
         // Delete method
         [HttpPost]
