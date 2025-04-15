@@ -20,43 +20,41 @@ namespace TodoApp.Controllers
             _userManager = userManager;
         }
 
-
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(DateTime? dueDate)
         {
+            Console.WriteLine($"DueDate: {dueDate}"); // Debugging
             var userId = _userManager.GetUserId(User);
+
             if (string.IsNullOrEmpty(userId))
             {
                 return RedirectToAction("Login", "Account");
             }
 
-            var containers = await _context.TodoContainers
+            var containersQuery = _context.TodoContainers
                 .Where(c => c.UserId == userId)
-                .Include(c => c.TodoItems) // Bao gồm TodoItems
-                .ToListAsync();
+                .Include(c => c.TodoItems)
+                .AsQueryable();
 
-            // Sử dụng JsonSerializerOptions với ReferenceHandler.Preserve để tránh chu kỳ
-            var jsonOptions = new JsonSerializerOptions
+            // Nếu có dueDate, lọc theo ngày
+            if (dueDate.HasValue)
             {
-                ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve,
-                MaxDepth = 64
-            };
+                containersQuery = containersQuery
+                    .Where(c => c.DueDate.HasValue && c.DueDate.Value.Date == dueDate.Value.Date);
 
-            // Serialize các container và TodoItems thành JSON để kiểm tra
-            var serializedContainers = JsonSerializer.Serialize(containers, jsonOptions);
-            Console.WriteLine(serializedContainers); // Kiểm tra xem đã serialize thành công chưa
+                // Truyền lại cho View để hiển thị trong input
+                ViewData["DueDate"] = dueDate.Value.ToString("yyyy-MM-dd");
+            }
 
-            // Trả về kết quả dưới dạng JSON hoặc trong View
-            return RedirectToAction("Index", "Home", new { containers = containers });
+            var containers = await containersQuery.ToListAsync();
+
+            return View(containers);
         }
-
-
-
 
         public async Task<IActionResult> Save(TodoContainer container)
         {
             Console.WriteLine("Save method called");
             Console.WriteLine($"Container: {System.Text.Json.JsonSerializer.Serialize(container)}");
-            
+
             // Kiểm tra xem người dùng đã đăng nhập chưa
             if (!User.Identity.IsAuthenticated)
             {
@@ -74,6 +72,18 @@ namespace TodoApp.Controllers
             {
                 container.UserId = userId;
                 container.CreatedAt = DateTime.Now;
+
+                // check ngày đó đã có container chưa có ròi không cho tạo nữa 
+                var existingContainer = await _context.TodoContainers
+                    .FirstOrDefaultAsync(c => c.UserId == userId && c.DueDate == container.DueDate);
+                if (existingContainer != null)
+                {
+                    // Nếu đã có container với ngày đó, trả về thông báo lỗi
+                    TempData["ErrorMessage"] = "Container with this due date already exists.";
+                    return RedirectToAction("Index", "Home");
+                }
+
+
                 _context.TodoContainers.Add(container);
             }
             else // Chỉnh sửa
@@ -104,7 +114,7 @@ namespace TodoApp.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-    
+
         // Delete method
         [HttpPost]
         public async Task<IActionResult> Delete(int id)

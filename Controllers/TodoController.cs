@@ -48,7 +48,7 @@ namespace TodoApp.Controllers
             bool checkDone = false; // Mặc định là chưa hoàn thành
 
             // Cập nhật trạng thái IsDone
-            if (isDone == "true") 
+            if (isDone == "true")
             {
                 checkDone = true;
             }

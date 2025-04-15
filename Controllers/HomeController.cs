@@ -20,22 +20,36 @@ public class HomeController : Controller
         _userManager = userManager;
     }
 
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(DateTime? dueDate)
     {
+        Console.WriteLine($"DueDate: {dueDate}"); // Debugging
         var userId = _userManager.GetUserId(User);
+
         if (string.IsNullOrEmpty(userId))
         {
             return RedirectToAction("Login", "Account");
         }
 
-        var containers = await _context.TodoContainers
+        var containersQuery = _context.TodoContainers
             .Where(c => c.UserId == userId)
             .Include(c => c.TodoItems)
-            .ToListAsync();
+            .AsQueryable();
 
-        Console.WriteLine($"Containers: {System.Text.Json.JsonSerializer.Serialize(containers)}"); // Debugging
-        Console.WriteLine($"Found {containers.Count} containers");
+        // Nếu có dueDate, lọc theo ngày
+        if (dueDate.HasValue)
+        {
+            containersQuery = containersQuery
+                .Where(c => c.DueDate.HasValue && c.DueDate.Value.Date == dueDate.Value.Date);
 
-        return View(containers); // Đảm bảo View Index.cshtml dùng @model List<TodoContainer>
+            // Truyền lại cho View để hiển thị trong input
+            ViewData["DueDate"] = dueDate.Value.ToString("yyyy-MM-dd");
+        }
+
+        var containers = await containersQuery.ToListAsync();
+
+        ViewBag.ErrorMessage = TempData["ErrorMessage"] as string;
+
+        return View(containers);
     }
+
 }

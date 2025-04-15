@@ -99,7 +99,8 @@ public class AccountController : Controller
     // Register
     [HttpGet]
     [AllowAnonymous]
-    public IActionResult Register() {
+    public IActionResult Register()
+    {
         ViewData["Title"] = "Register";
         return View(new RegisterDTO());
     }
