@@ -13,6 +13,9 @@ namespace TodoApp.Data
         public DbSet<TodoContainer> TodoContainers { get; set; }
         public DbSet<TodoItem> TodoItems { get; set; }
 
+        public DbSet<NotificationModel> Notifications { get; set; }
+        public DbSet<UserNotification> UserNotifications { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -58,6 +61,16 @@ namespace TodoApp.Data
                 b.Property(c => c.Id).HasMaxLength(255);
                 b.Property(c => c.RoleId).HasMaxLength(255);
             });
+
+            builder.Entity<UserNotification>()
+                .HasOne(un => un.User)
+                .WithMany() // hoặc .WithMany(u => u.UserNotifications) nếu bạn khai báo navigation ngược
+                .HasForeignKey(un => un.UserId);
+
+            builder.Entity<UserNotification>()
+                .HasOne(un => un.Notification)
+                .WithMany(n => n.UserNotifications)
+                .HasForeignKey(un => un.NotificationId);
         }
     }
 }
